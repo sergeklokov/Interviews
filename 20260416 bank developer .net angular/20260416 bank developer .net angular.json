@@ -1,0 +1,38 @@
+[
+  {
+    "sid": "/1-legacy-net-framework-experience",
+    "title": "1. Legacy .NET Framework Experience",
+    "level": 3,
+    "children": []
+  },
+  {
+    "sid": "/2-aspnet-web-forms-experience",
+    "title": "2. ASP.NET Web Forms Experience",
+    "level": 3,
+    "children": []
+  },
+  {
+    "sid": "/3-modernization--migration-strategies",
+    "title": "3. Modernization & Migration Strategies",
+    "level": 3,
+    "children": []
+  },
+  {
+    "sid": "/4-data-access-layer-choices",
+    "title": "4. Data Access Layer Choices",
+    "level": 3,
+    "children": []
+  },
+  {
+    "sid": "/5-database-performance-troubleshooting",
+    "title": "5. Database Performance Troubleshooting",
+    "level": 3,
+    "children": []
+  },
+  {
+    "sid": "/6-rapid-fire-technical-questions",
+    "title": "6. Rapid-Fire Technical Questions",
+    "level": 3,
+    "children": []
+  }
+]
