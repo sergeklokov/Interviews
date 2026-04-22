@@ -25,7 +25,98 @@ Key decisions usually include:
 - Use the old application as a functional prototype or technical specification for the new UI.
 - Front-end technology is a team decision. Common choices are Angular (very popular for upgrades), Blazor (capable of large-scale apps with proper lazy loading), or updated MVC/Razor Pages.
 
+In more details:  
+When migrating legacy Web Forms applications, I typically use an incremental approach. I start by extracting business logic from code‑behind into services or APIs, so both the legacy and new platforms can share the same backend. Then I migrate the UI feature by feature, usually to MVC, Razor Pages, or ASP.NET Core, while reducing ViewState and session dependencies. This allows parallel running, minimizes risk, and avoids a big‑bang rewrite.
+For the database, I usually keep it initially and avoid big schema changes early. I add a data access layer or repositories and expose data through services/APIs, so both the legacy Web Forms app and the new platform use the same database safely. Schema refactoring, performance tuning, or splitting databases is done incrementally, once the new application is stable and usage patterns are well understood.
+
 Blazor has matured significantly and can handle large enterprise applications, similar to how Angular scaled from small SPAs to full enterprise solutions.
+
+[Strangler Fig pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/strangler-fig)
+
+#### Modern Technologies for Rewriting Legacy ASP.NET Web Forms Applications
+
+Below are **several concrete examples of modern technologies** commonly used to **rewrite or modernize legacy ASP.NET Web Forms (ASPX/ASMX) monolithic applications**, especially when applying an incremental approach such as the **Strangler Fig pattern**.
+
+---
+
+#### Backend / API Layer
+
+- **ASP.NET Core (.NET 8 / LTS)**  
+  Modern, high‑performance, cross‑platform framework for building REST APIs and backend services. A natural replacement for ASMX services and Web Forms code‑behind logic.
+
+- **Minimal APIs**  
+  A lightweight ASP.NET Core approach for quickly exposing endpoints with minimal boilerplate—ideal for carving out small pieces of legacy functionality.
+
+- **gRPC (for internal services)**  
+  High‑performance, strongly typed service‑to‑service communication, useful after extracting parts of the monolith into independent services.
+
+---
+
+#### Frontend / UI
+
+- **Angular**  
+  Common enterprise choice:
+  - Strong typing with TypeScript  
+  - Mature tooling and long‑term support  
+  - Works well side‑by‑side with Web Forms during transition
+
+- **React**  
+  Often used for incremental UI replacement (widget‑by‑widget) embedded into existing ASPX pages.
+
+- **Blazor (Server or WebAssembly)**  
+  Good fit for teams wanting to stay mostly in C#:
+  - Blazor Server for faster migrations  
+  - Blazor WebAssembly for rich client‑side experiences
+
+---
+
+#### Integration & Legacy Coexistence
+
+- **ASP.NET Core API Gateway**  
+  Acts as a façade in front of legacy ASMX services while routing new functionality to modern services—classic Strangler Fig entry point.
+
+- **YARP (Yet Another Reverse Proxy) or Azure API Management**  
+  Transparently routes traffic between legacy Web Forms endpoints and new services.
+
+---
+
+#### Data & Persistence
+
+- **Entity Framework Core**  
+  Modern ORM replacing older ADO.NET or NHibernate usage.
+
+- **Dapper**  
+  Lightweight micro‑ORM for performance‑critical paths or when working with complex legacy schemas.
+
+- **Database‑per‑service (gradual)**  
+  Over time, extracted services own their own schemas instead of sharing a monolithic database.
+
+---
+
+#### Authentication & Security
+
+- **Azure AD / Entra ID**  
+  Enterprise identity platform using modern OpenID Connect and OAuth 2.0 standards.
+
+- **JWT & OAuth 2.0**  
+  Standard approach for securing APIs and SPAs such as Angular applications.
+
+---
+
+#### Infrastructure & DevOps
+
+- **Docker**  
+  Containerizes newly extracted services without requiring a full rewrite.
+
+- **Kubernetes or Azure App Service**  
+  Enables independent deployment and scaling of modern services.
+
+- **CI/CD (Azure DevOps or GitHub Actions)**  
+  Supports frequent, low‑risk releases—often a key benefit over legacy Web Forms deployments.
+
+---
+
+#### Typical Target Architecture
 
 ### 4. Data Access Layer Choices
 
@@ -34,6 +125,41 @@ Blazor has matured significantly and can handle large enterprise applications, s
 **Answer:** I generally prefer **Entity Framework Core** for its clean LINQ code and high developer productivity. **Dapper** is an excellent lightweight option, especially for smaller applications or when maximum performance is needed.
 
 Stored procedures are still valuable for complex business logic or performance-critical paths, because EF Core can sometimes be noticeably slower (the exact difference depends on the query and indexing). Stored procedures can be called from EF Core or via raw ADO.NET when required. In one project, moving heavy logic into a stored procedure resolved long timeouts and deadlocks.
+
+#### How I decide between EF Core, Dapper, and stored procedures
+
+In modernization projects, the goal isn’t to pick a single data‑access strategy—it’s to **use each where it fits best**.
+
+- **Entity Framework Core**  
+  Best for **new or refactored business logic** where maintainability matters. It works well for write‑heavy workflows, domain modeling, and services extracted using the **Strangler Fig pattern**. EF Core keeps business rules in C#, simplifies schema evolution, and improves long‑term clarity.
+
+- **Dapper**  
+  Ideal for **performance‑critical or complex read queries**, reporting, and working with legacy schemas. It provides full SQL control with minimal overhead and predictable performance.
+
+- **Stored Procedures**  
+  Still valuable where they already provide real benefits—shared database contracts, highly tuned queries, or regulated environments. Treat them as **integration boundaries**, not the default for new logic.
+
+**Typical successful mix:**
+
+#### Calling a SQL Server stored procedure from EF Core (single example)
+
+```csharp
+// DTO matching the stored procedure result
+public class OrderSummary
+{
+    public int OrderId { get; set; }
+    public decimal Total { get; set; }
+}
+
+// Call the stored procedure
+var orders = await context.Set<OrderSummary>()
+    .FromSqlRaw(
+        "EXEC dbo.GetOrderSummaries @CustomerId",
+        new SqlParameter("@CustomerId", customerId)
+    )
+    .AsNoTracking()
+    .ToListAsync();
+```
 
 ### 5. Database Performance Troubleshooting
 
@@ -53,11 +179,105 @@ Common legacy problems include overly shared tables causing deadlocks, insuffici
 
 ### 6. Rapid-Fire Technical Questions
 
-**Async / Await in C#** Used to write non-blocking asynchronous code so the thread is not blocked while waiting for I/O operations (very common in UI and backend services).
+**Async / Await in C#** Used to write non-blocking asynchronous code so the thread is not blocked while waiting for I/O operations (very common in UI and backend services).  
 
-**Middleware in ASP.NET Core** Components that sit in the HTTP request pipeline. Yes, I have implemented custom middleware for cross-cutting concerns.
+```csharp
+public async Task<string> GetDataAsync()
+{
+    // Simulate async work (e.g., I/O or HTTP call)
+    await Task.Delay(1000);
+    return "Hello from async method";
+}
+
+public async Task ExampleAsync()
+{
+    string result = await GetDataAsync();
+    Console.WriteLine(result);
+}
+```
+
+**Middleware in ASP.NET Core** Components that sit in the HTTP request pipeline. Yes, I have implemented custom middleware for cross-cutting concerns.  
+`Mental model: ` Middleware = filters for HTTP requests, executed in order, forming a pipeline.
+
+```csharp
+app.Use(async (context, next) =>
+{
+    Console.WriteLine("Before request");
+
+    await next(); // call next middleware
+
+    Console.WriteLine("After request");
+});
+```
+
+Built‑in middleware examples
+```csharp
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseRouting();
+```
 
 **Validation Approaches** I use a combination: **Data Annotations** for client-side/UI validation + server-side validation (e.g., checking database state).
+
+```csharp
+[HttpPost]
+public IActionResult CreateUser(UserRequest request)
+{
+    if (request.Age < 18 || request.EducationLevel != "HighSchool")
+    {
+        ModelState.AddModelError(
+            string.Empty,
+            "Age or education level is invalid."
+        );
+    }
+
+    if (!ModelState.IsValid)
+    {
+        return BadRequest(ModelState);
+    }
+
+    return Ok();
+}
+```
+
+#### Validation in Angular
+
+#### Angular Validation Examples (Reactive Forms)
+
+Below are **both common Angular validation examples** so you can copy them together:
+1. **Field‑level validation**
+2. **Cross‑field (combo) validation**
+
+---
+
+#### 1️⃣ Field‑Level Validation (single field rules)
+
+Component (TypeScript)
+```ts
+import { FormBuilder, Validators } from '@angular/forms';
+
+constructor(private fb: FormBuilder) {}
+
+userForm = this.fb.group({
+  email: ['', [Validators.required, Validators.email]],
+  age: [null, [Validators.required, Validators.min(18)]]
+});
+```
+
+Template(HTML)
+```html
+<input formControlName="email" placeholder="Email">
+<div *ngIf="userForm.controls.email.invalid && userForm.controls.email.touched">
+  Invalid email
+</div>
+
+<input type="number" formControlName="age" placeholder="Age">
+<div *ngIf="userForm.controls.age.invalid && userForm.controls.age.touched">
+  Age must be 18 or older
+</div>
+
+<button [disabled]="userForm.invalid">Submit</button>
+```
 
 **API Versioning** I use URL path versioning most often (e.g., /api/v1/... and /api/v2/...) to keep APIs stable for consumers.
 
