@@ -281,6 +281,30 @@ Template(HTML)
 
 **API Versioning** I use URL path versioning most often (e.g., /api/v1/... and /api/v2/...) to keep APIs stable for consumers.
 
+dotnet add package Microsoft.AspNetCore.Mvc.Versioning
+
+```csharp
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+});
+
+[ApiController]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/users")]
+public class UsersV1Controller : ControllerBase
+{
+    [HttpGet]
+    public IActionResult Get()
+    {
+        return Ok(new { Name = "John", Version = "v1" });
+    }
+}
+```
+
+
 **Calling Stored Procedures in EF Core** Yes, supported via FromSqlInterpolated or ExecuteSqlInterpolated.
 
 **Explicit Transactions in EF Core** Yes, using context.Database.BeginTransaction() inside a using block, followed by Commit().
