@@ -313,7 +313,78 @@ public class UsersV1Controller : ControllerBase
 
 **Server-side Pagination** Handled in SQL with OFFSET / FETCH or by passing page parameters to stored procedures. Front-end frameworks provide UI components.
 
+SQL
+```SQL
+DECLARE @PageNumber INT = 2;
+DECLARE @PageSize   INT = 10;
+
+SELECT Id, Name, CreatedDate
+FROM Users
+ORDER BY CreatedDate DESC
+OFFSET (@PageNumber - 1) * @PageSize ROWS
+FETCH NEXT @PageSize ROWS ONLY;
+
+```
+
+In Angular we call API with specific page:  
+GET /api/users?page=2&pageSize=10
+
+Angular service:
+```TypeScript
+getUsers(page: number, pageSize: number) {
+  return this.http.get<any>(
+    `/api/users?page=${page}&pageSize=${pageSize}`
+  );
+}
+```
+
+Angular Component:
+```TypeScript
+page = 1;
+pageSize = 10;
+users: any[] = [];
+totalCount = 0;
+
+loadUsers() {
+  this.userService.getUsers(this.page, this.pageSize)
+    .subscribe(result => {
+      this.users = result.items;
+      this.totalCount = result.totalCount;
+    });
+}
+
+next() {
+  this.page++;
+  this.loadUsers();
+}
+
+prev() {
+  if (this.page > 1) {
+    this.page--;
+    this.loadUsers();
+  }
+}
+
+```
+
 **Two-way Data Binding in Angular** Data flows automatically between the UI and the component model using [(ngModel)] (banana-in-a-box syntax).
+
+```HTML
+<input [(ngModel)]="username">
+<p>Hello, {{ username }}</p>
+```
+
+```TypeScript
+export class AppComponent {
+  username  = 'Sergiy';
+}
+
+import { FormsModule } from '@angular/forms';
+@NgModule({
+  imports: [FormsModule]
+})
+export class AppModule {}
+```
 
 **Microservices vs Monolithic** Microservices run as small, independent services (usually in containers), offering better scalability and lower resource usage when idle compared to a single monolithic application.
 
