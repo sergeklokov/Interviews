@@ -379,6 +379,7 @@ export class AppComponent {
   username  = 'Sergiy';
 }
 
+//separate file for module
 import { FormsModule } from '@angular/forms';
 @NgModule({
   imports: [FormsModule]
