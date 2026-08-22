@@ -1,0 +1,31 @@
+graph TD
+    subgraph "Frontend"
+        A[Angular 18+ <br> Signals + Standalone]
+    end
+
+    subgraph "API Layer"
+        B[Azure API Management <br> or Ocelot]
+        C[.NET 8 Web API <br> Minimal APIs]
+        D[MediatR + CQRS <br> Domain Services]
+    end
+
+    subgraph "Data Layer"
+        E[Azure SQL Database]
+        F[Azure Cosmos DB]
+        G[Redis Cache]
+    end
+
+    subgraph "Infrastructure"
+        H[Azure Container Apps <br> or AKS]
+        I[Azure Functions <br> Background Jobs]
+        J[Service Bus / Event Grid]
+    end
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    D --> F
+    C --> G
+    C --> I
+    J --> C
