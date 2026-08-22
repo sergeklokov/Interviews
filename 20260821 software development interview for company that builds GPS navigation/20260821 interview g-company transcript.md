@@ -1,10 +1,11 @@
 # Транскрипт собеседования в Garmin + комментарии
 
 **Кандидат:** Sergey  
-**Интервьюер:** Sha Desh Pandi (Team Lead, Commercial Aviation)  
+**Интервьюер:** S* (Team Lead, Commercial Aviation)  
 **Формат:** Видеозвонок  
 **Итоговое решение кандидата:** Отказать (полный офис 5 дней, открытая парковка, legacy VB6, вероятная скученность)
 
+[software development interview for company that builds GPS navigation on YouTube](https://www.youtube.com/watch?v=ZhG3kwsEnZY)
 ---
 
 ### 0:00 – 0:21 | Приветствие и имя
@@ -23,7 +24,7 @@
 ### 0:21 – 3:44 | Монолог интервьюера о себе, компании и продуктах
 
 Интервьюер рассказывает:
-- Team Lead, 14 лет в Garmin
+- Team Lead, 14 лет в G
 - Commercial aviation projects
 - Microsoft-стек: от VB6 до C#, Blazor
 - Причина legacy: авиационные регуляции, отрасль обновляется очень медленно

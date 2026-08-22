@@ -1,9 +1,13 @@
-# Анализ собеседования в Garmin (Commercial Aviation)
+# Анализ собеседования в G (Commercial Aviation)
 
 **Кандидат:** Sergey  
-**Интервьюер:** Sha Desh Pandi (Team Lead)  
+**Интервьюер:** S***ha Desh Pandi*** (Team Lead)  
 **Дата:** август 2026  
 **Решение кандидата:** Однозначно отказать. Полный офис 5 дней в неделю + открытая парковка в Аризоне + legacy VB6 + вероятная скученность офиса — неприемлемые условия.
+
+[software development interview for company that builds GPS navigation on YouTube](https://www.youtube.com/watch?v=ZhG3kwsEnZY)
+
+
 
 ---
 
